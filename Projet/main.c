@@ -9,7 +9,7 @@ int verify_format_ipv4(const char* ipv4_address);
 int verify_format_mask(const char* mask);
 
 
-void convert_IPV4(const char* ipv4_address, char* binary_result, char* mask, char* binary_mask, char* hex_result) {
+void convert_IPV4(const char* ipv4_address, char* binary_result, char* mask, char* binary_mask, char* hex_result, char* network) {
     int a, b, c, d;
    
     // Analyser l'adresse IPv4 et extraire les octets
@@ -21,7 +21,16 @@ void convert_IPV4(const char* ipv4_address, char* binary_result, char* mask, cha
     convert_ipv4_to_binary(ipv4_address, binary_result);
     convert_ipv4_to_binary(mask, binary_mask);
     sprintf(hex_result, "%02X.%02X.%02X.%02X", a, b, c, d);
-}
+    // Effectuer l'opération XOR bit par bit entre binary_result et binary_mask
+    for (int i = 0; i < 36; i++) {
+        if (binary_result[i] == '1' && binary_mask[i] == '1') {
+            network[i] = '1';
+        } else {
+            network[i] = '0';
+        }
+    }
+    network[36] = '\0'; // Ajouter le caractère de fin de chaîne
+    }
 
 void convert_ipv4_to_binary(const char* ipv4_address, char* binary_result) {
     int a, b, c, d;
@@ -58,74 +67,90 @@ int callback(void *NotUsed, int argc, char **argv, char **azColName) {
     return 0;
 }
 
-void search_by_mask(sqlite3 *db) {
-    char ipv4_address[16];
-    char mask[16];
-    unsigned int a, b, c, d;
-    unsigned int mask_a, mask_b, mask_c, mask_d;
-    unsigned long int network, mask_int;
-    char sql[1024];
-    char *err_msg = 0;
-    int rc;
 
-    printf("\nSaisir une adresse IPv4: ");
-    scanf("%15s", ipv4_address);
-    printf("Saisir un masque: ");
-    scanf("%15s", mask);
-
-    sscanf(ipv4_address, "%u.%u.%u.%u", &a, &b, &c, &d);
-    sscanf(mask, "%u.%u.%u.%u", &mask_a, &mask_b, &mask_c, &mask_d);
-
-    network = (a & mask_a) << 24 | (b & mask_b) << 16 | (c & mask_c) << 8 | (d & mask_d);
-    mask_int = mask_a << 24 | mask_b << 16 | mask_c << 8 | mask_d;
-
-    sprintf(sql, "SELECT IPV4 FROM Address WHERE (Binary_IPV4 & %lu) = (Binary_IPV4 & %lu)", network, mask_int);
-
-
-    // Ouvrir la base de données
-    rc = sqlite3_open("bdd.sqlite", &db);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
-        return;
-    }
-
-    // Exécuter la requête
-    rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
-    if (rc != SQLITE_OK && rc != SQLITE_EMPTY ) {
-        fprintf(stderr, "SQL error: %s\n", err_msg);
-        sqlite3_free(err_msg);
-    } else {
-        printf("Recherche effectuée avec succès\n");
-    }
-
-    // Fermer la base de données
-    sqlite3_close(db);
-}
 
 void create_bdd(sqlite3 *db) {
     char *err_msg = 0;
     int rc;
 
-    char *sql = "CREATE TABLE Address(Id INTEGER PRIMARY KEY AUTOINCREMENT, IPV4 TEXT, Binary_IPV4 TEXT, Mask TEXT, Binary_mask TEXT, Hexadecimal TEXT);";
+    char *sql = "CREATE TABLE Address(Id INTEGER PRIMARY KEY AUTOINCREMENT, IPV4 TEXT, Binary_IPV4 TEXT, Mask TEXT, Binary_mask TEXT, Hexadecimal TEXT, Network TEXT);";
 
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", err_msg);
+        // fprintf(stderr, "SQL error: %s\n", err_msg);
         sqlite3_free(err_msg);
     } else {
         printf("Table created successfully\n");
     }
 }
 
+int search_by_mask(sqlite3 *db) {
+    char *err_msg = 0;
+    int rc;
+    char mask[16];
+    char ipv4_address[16];
+    char binary_mask[36];
+    char binary_result[36];
+    char network[36];
 
-void insert_ip_data(sqlite3 *db, const char* ipv4_address, const char* mask, const char* binary_result, const char* binary_mask, const char* hex_result) {
+    rc = sqlite3_open("bdd.sqlite", &db);
+
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return 1;
+    }
+
+    do {
+        printf("\nSaisir une adresse IPv4: ");
+        scanf("%s", ipv4_address);
+    } while (!verify_format_ipv4(ipv4_address));
+
+    do {
+        printf("Saisir un masque: ");
+        scanf("%s", mask);
+    } while (!verify_format_mask(mask));
+
+    convert_ipv4_to_binary(ipv4_address, binary_result);
+    convert_ipv4_to_binary(mask, binary_mask);
+
+    for (int i = 0; i < 36; i++) {
+        if (binary_result[i] == '1' && binary_mask[i] == '1') {
+            network[i] = '1';
+        } else {
+            network[i] = '0';
+        }
+    }
+    network[36] = '\0';
+
+    char sql[100];
+
+    sprintf(sql, "SELECT IPV4 FROM Address WHERE Network = '%s'", network);
+
+    printf("\nIp dans le même réseau que %s : \n\n", ipv4_address);
+
+    rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
+
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Failed to select data\n");
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+        sqlite3_free(err_msg);
+    }
+
+
+    sqlite3_close(db);
+    return 0;
+}
+
+
+
+void insert_ip_data(sqlite3 *db, const char* ipv4_address, const char* mask, const char* binary_result, const char* binary_mask, const char* hex_result, const char* network) {
     char *err_msg = 0;
     char sql[1024];
     int rc;
 
-    sprintf(sql, "INSERT INTO Address (IPV4, Binary_IPV4, Mask, Binary_mask, Hexadecimal) VALUES ('%s', '%s', '%s', '%s', '%s');", ipv4_address, binary_result, mask, binary_mask, hex_result);
+    sprintf(sql, "INSERT INTO Address (IPV4, Binary_IPV4, Mask, Binary_mask, Hexadecimal, Network) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');", ipv4_address, binary_result, mask, binary_mask, hex_result, network);
     
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
@@ -207,6 +232,7 @@ int add_ip_address() {
     char binary_mask[36]; // 35 caractères + 1 pour le caractère nul
     char binary_result[36]; // 35 caractères + 1 pour le caractère nul
     char hex_result[12];    // 11 caractères + 1 pour le caractère nul
+    char network[36];       // 35 caractères + 1 pour le caractère nul
     sqlite3 *db;
 
     // Ouvrir la base de données et créer la table
@@ -231,10 +257,10 @@ int add_ip_address() {
     } while (!verify_format_mask(mask));
 
     // Convertir l'adresse IPv4 et obtenir les résultats
-    convert_IPV4(ipv4_address, binary_result, mask, binary_mask, hex_result);
+    convert_IPV4(ipv4_address, binary_result, mask, binary_mask, hex_result, network);
 
     // Insérer les données dans la base de données
-    insert_ip_data(db, ipv4_address, mask, binary_result, binary_mask , hex_result);
+    insert_ip_data(db, ipv4_address, mask, binary_result, binary_mask , hex_result, network);
 
     sqlite3_close(db);
     return 0;
