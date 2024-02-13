@@ -4,107 +4,95 @@
 
 #include <gtk/gtk.h>
 
+
+
+//#include "../process.h"
+
 int display_all();
+typedef struct {
+    GtkListStore *store;
+    int num_cols;
+} QueryData;
 
-#include <gtk/gtk.h>
-#include "../process.h"
-#include <gtk/gtk.h>
+int callback(void *data, int argc, char **argv, char **azColName) {
+    QueryData *queryData = (QueryData *)data;
+    GtkListStore *store = queryData->store;
+    GtkTreeIter iter;
 
+    gtk_list_store_append(store, &iter);
 
-
-
-void show_all_ip(GtkWidget *widget, gpointer user_data) {
-
-
-    // Create a dialog
-    GtkWidget *dialog = gtk_dialog_new_with_buttons("Ajouter IP",
-                                                    GTK_WINDOW(user_data),
-                                                    GTK_DIALOG_MODAL,
-                                                    "Fermer",
-                                                    GTK_RESPONSE_CANCEL,
-                                                    "Ajouter",
-                                                    GTK_RESPONSE_OK,
-                                                    NULL);
-
-    gtk_window_set_default_size(GTK_WINDOW(dialog), 400, 300);
-
-
-    GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-
-
-    gtk_widget_show_all(dialog);
-
-
-    int running = 1;
-
-    while(running) {
-
-        gint result = gtk_dialog_run(GTK_DIALOG(dialog));
-
-        if (result == GTK_RESPONSE_OK) {
-
-
-            char *printing = malloc(sizeof(char) * 100);
-
-
-            sqlite3 *db;
-
-            if (sqlite3_open("../bdd.sqlite", &db) != SQLITE_OK) {
-                printing = "Cannot open database \n";
-                sqlite3_close(db);
-            }
-
-            if (sqlite3_exec(db, "SELECT * FROM Address", NULL, NULL, NULL) != SQLITE_OK) {
-                create_bdd(db);
-            }
-
-                sqlite3_close(db);
-
-
-            printing = (char *) display_all();
-
-            GtkWidget *message = gtk_label_new(NULL);
-
-            gtk_label_set_text(GTK_LABEL(message), g_strdup_printf(printing));
-            gtk_container_add(GTK_CONTAINER(content_area), message);
-
-            gtk_widget_show_all(dialog);
-
-
-        } else if (result == GTK_RESPONSE_CANCEL) {
-            running = 0;
-        }
+    for (int i = 0; i < argc; i++) {
+        gtk_list_store_set(store, &iter, i, argv[i] ? argv[i] : "NULL", -1);
     }
-    gtk_widget_destroy(dialog);
 
-
+    return 0;
 }
 
-#endif //GTK_TP_GTK_ADD_IP_H
+void create_and_show_window(sqlite3 *db) {
+    GtkWidget *window, *treeview;
+    GtkListStore *store;
+    GtkCellRenderer *renderer;
+    GtkTreeViewColumn *column;
+    QueryData queryData;
+
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), "Résultats de la requête");
+    gtk_window_set_default_size(GTK_WINDOW(window), 600, 400);
+    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+    store = gtk_list_store_new(6, G_TYPE_STRING, G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING,G_TYPE_STRING);  //fAUt preciser en fonction des colonnes
+    queryData.store = store;
+
+    treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+    gtk_container_add(GTK_CONTAINER(window), treeview);
 
 
-int display_all(){
+
+    renderer = gtk_cell_renderer_text_new();
+    column = gtk_tree_view_column_new_with_attributes("ID", renderer, "text", 0, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+
+    renderer = gtk_cell_renderer_text_new();
+    column = gtk_tree_view_column_new_with_attributes("IPV4", renderer, "text", 1, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+
+    renderer = gtk_cell_renderer_text_new();
+    column = gtk_tree_view_column_new_with_attributes("Mask", renderer, "text", 3, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+
+    renderer = gtk_cell_renderer_text_new();
+    column = gtk_tree_view_column_new_with_attributes("Binaire IP", renderer, "text", 2, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+
+    renderer = gtk_cell_renderer_text_new();
+    column = gtk_tree_view_column_new_with_attributes("Binaire mask", renderer, "text", 4, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+
+    renderer = gtk_cell_renderer_text_new();
+    column = gtk_tree_view_column_new_with_attributes("Hexadecimal", renderer, "text", 5, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+
+    char *err_msg = NULL;
+    if (sqlite3_exec(db, "SELECT Id, IPV4, Binary_IPV4, Mask, Binary_mask, Hexadecimal FROM Address;", callback, &queryData, &err_msg) != SQLITE_OK) {
+        fprintf(stderr, "Erreur SQL : %s\n", err_msg);
+        sqlite3_free(err_msg);
+    }
+
+    gtk_widget_show_all(window);
+}
+
+int show_all_ip(int argc, char *argv[]) {
     sqlite3 *db;
-    char *err_msg = 0;
-    int rc;
 
-    rc = sqlite3_open("../bdd.sqlite", &db);
+    gtk_init(&argc, &argv);
 
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+    if (sqlite3_open("../bdd.sqlite", &db) != SQLITE_OK) {
         return 1;
     }
 
-    char *sql = "SELECT * FROM Address";
+    create_and_show_window(db);
 
-    rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
-
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Failed to select data\n");
-        fprintf(stderr, "SQL error: %s\n", err_msg);
-        sqlite3_free(err_msg);
-    }
+    gtk_main();
 
     sqlite3_close(db);
     return 0;

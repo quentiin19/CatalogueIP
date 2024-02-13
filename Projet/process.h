@@ -51,7 +51,7 @@ void convert_ipv4_to_binary(const char* ipv4_address, char* binary_result) {
     binary_result[35] = '\0'; // Caractère de fin de chaîne
 }
 
-
+/*
 int callback(void *NotUsed, int argc, char **argv, char **azColName) {
     NotUsed = 0;
 
@@ -66,7 +66,7 @@ int callback(void *NotUsed, int argc, char **argv, char **azColName) {
     printf("\n");
     return 0;
 }
-
+*/
 
 
 void create_bdd(sqlite3 *db) {
