@@ -119,6 +119,9 @@
 		<Unit filename="/mnt/c/Users/Lucas/Desktop/CatalogueIP/Projet/fonction/gtk_add_ip.h">
 			<Option target="start"/>
 		</Unit>
+		<Unit filename="/mnt/c/Users/Lucas/Desktop/CatalogueIP/Projet/fonction/gtk_search_all.h">
+			<Option target="start"/>
+		</Unit>
 		<Unit filename="/mnt/c/Users/Lucas/Desktop/CatalogueIP/Projet/main.c">
 			<Option target="start"/>
 		</Unit>

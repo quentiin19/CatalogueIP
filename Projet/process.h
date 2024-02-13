@@ -145,22 +145,8 @@ int search_by_mask(sqlite3 *db) {
 
 
 
-void insert_ip_data(sqlite3 *db, const char* ipv4_address, const char* mask, const char* binary_result, const char* binary_mask, const char* hex_result, const char* network) {
-    char *err_msg = 0;
-    char sql[1024];
-    int rc;
 
-    sprintf(sql, "INSERT INTO Address (IPV4, Binary_IPV4, Mask, Binary_mask, Hexadecimal, Network) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');", ipv4_address, binary_result, mask, binary_mask, hex_result, network);
-    
-    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", err_msg);
-        sqlite3_free(err_msg);
-    } else {
-        printf("IP address data inserted successfully\n");
-    }
-}
 
 int verify_format_ipv4(const char* ipv4_address) {
     int a, b, c, d;
@@ -266,33 +252,6 @@ int add_ip_address() {
     return 0;
 }
 
-int display_all(){
-    sqlite3 *db;
-    char *err_msg = 0;
-    int rc;
-
-    rc = sqlite3_open("bdd.sqlite", &db);
-
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
-        return 1;
-    }
-
-    char *sql = "SELECT * FROM Address";
-
-    rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
-
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Failed to select data\n");
-        fprintf(stderr, "SQL error: %s\n", err_msg);
-        sqlite3_free(err_msg);
-    }
-
-    sqlite3_close(db);
-    return 0;
-}
-
 int delete_ip_address(){
     sqlite3 *db;
     char *err_msg = 0;
@@ -336,46 +295,5 @@ int delete_ip_address(){
     }
 
     sqlite3_close(db);
-    return 0;
-}
-
-
-int maine() {
-    char ipv4_address[16]; // 15 caractères + 1 pour le caractère nul
-    char mask[16];        // 15 caractères + 1 pour le caractère nul
-    char binary_mask[36]; // 35 caractères + 1 pour le caractère nul
-    char binary_result[36]; // 35 caractères + 1 pour le caractère nul
-    char hex_result[12];    // 11 caractères + 1 pour le caractère nul
-    sqlite3 *db;
-    int choice;
-
-    create_bdd(db);
-
-    design();
-    choice=display_menu();
-
-    switch (choice) {
-        case 1:
-            add_ip_address();
-            break;
-        case 2:
-            display_all();
-            break;
-        case 3:
-            search_by_mask(db);
-            break;
-        case 4:
-            delete_ip_address();
-            break;
-        case 5:
-            bye();
-            // Exit
-            //quick_exit(0);
-            break;
-        default:
-            printf("Invalid choice\n");
-            break;
-    }
-
     return 0;
 }
