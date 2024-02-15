@@ -8,27 +8,36 @@
 
 //#include "../process.h"
 
-int display_all();
 typedef struct {
     GtkListStore *store;
     int num_cols;
 } QueryData;
 
-int callback(void *data, int argc, char **argv, char **azColName) {
+int display(void *data, int argc, char **argv, char **azColName) {
     QueryData *queryData = (QueryData *)data;
     GtkListStore *store = queryData->store;
     GtkTreeIter iter;
 
     gtk_list_store_append(store, &iter);
 
+
+
     for (int i = 0; i < argc; i++) {
         gtk_list_store_set(store, &iter, i, argv[i] ? argv[i] : "NULL", -1);
+        //printf("%s",argv[i]);
     }
 
     return 0;
 }
 
-void create_and_show_window(sqlite3 *db) {
+
+int show_all_ip() {
+    sqlite3 *db;
+
+    if (sqlite3_open("../bdd.sqlite", &db) != SQLITE_OK) {
+        return 1;
+    }
+
     GtkWidget *window, *treeview;
     GtkListStore *store;
     GtkCellRenderer *renderer;
@@ -73,26 +82,12 @@ void create_and_show_window(sqlite3 *db) {
     gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
 
     char *err_msg = NULL;
-    if (sqlite3_exec(db, "SELECT Id, IPV4, Binary_IPV4, Mask, Binary_mask, Hexadecimal FROM Address;", callback, &queryData, &err_msg) != SQLITE_OK) {
+    if (sqlite3_exec(db, "SELECT Id, IPV4, Binary_IPV4, Mask, Binary_mask, Hexadecimal FROM Address;", display, &queryData, &err_msg) != SQLITE_OK) {
         fprintf(stderr, "Erreur SQL : %s\n", err_msg);
         sqlite3_free(err_msg);
     }
 
     gtk_widget_show_all(window);
-}
-
-int show_all_ip(int argc, char *argv[]) {
-    sqlite3 *db;
-
-    gtk_init(&argc, &argv);
-
-    if (sqlite3_open("../bdd.sqlite", &db) != SQLITE_OK) {
-        return 1;
-    }
-
-    create_and_show_window(db);
-
-    gtk_main();
 
     sqlite3_close(db);
     return 0;

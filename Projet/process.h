@@ -4,9 +4,33 @@
 #include <sqlite3.h>
 
 void convert_ipv4_to_binary(const char* ipv4_address, char* binary_result);
-int callback();
+//int callback();
 int verify_format_ipv4(const char* ipv4_address);
 int verify_format_mask(const char* mask);
+
+
+
+void insert_ip_data(sqlite3 *db, const char* ipv4_address, const char* mask, const char* binary_result, const char* binary_mask, const char* hex_result, const char* network) {
+
+    char *err_msg = 0;
+    char sql[1024];
+    int rc;
+
+    size_t size = sizeof(ipv4_address);
+    printf("avant func --- %zu \n",size);
+
+    sprintf(sql, "INSERT INTO Address (IPV4, Binary_IPV4, Mask, Binary_mask, Hexadecimal, Network) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');", ipv4_address, binary_result, mask, binary_mask, hex_result, network);
+
+    printf("requete : %s", sql);
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
+
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+        sqlite3_free(err_msg);
+    } else {
+        printf("IP address data inserted successfully\n");
+    }
+}
 
 
 void convert_IPV4(const char* ipv4_address, char* binary_result, char* mask, char* binary_mask, char* hex_result, char* network) {
@@ -51,7 +75,7 @@ void convert_ipv4_to_binary(const char* ipv4_address, char* binary_result) {
     binary_result[35] = '\0'; // Caractère de fin de chaîne
 }
 
-/*
+
 int callback(void *NotUsed, int argc, char **argv, char **azColName) {
     NotUsed = 0;
 
@@ -66,7 +90,7 @@ int callback(void *NotUsed, int argc, char **argv, char **azColName) {
     printf("\n");
     return 0;
 }
-*/
+
 
 
 void create_bdd(sqlite3 *db) {
@@ -142,9 +166,6 @@ int search_by_mask(sqlite3 *db) {
     sqlite3_close(db);
     return 0;
 }
-
-
-
 
 
 

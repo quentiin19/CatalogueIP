@@ -781,8 +781,14 @@ CMakeFiles/start.dir/main.c.o: ../main.c \
   ../fonction/gtk_add_ip.h \
   ../process.h \
   /usr/include/sqlite3.h \
-  ../fonction/gtk_search_all.h
+  ../fonction/gtk_search_all.h \
+  ../fonction/gtk_search.h \
+  ../fonction/gtk_delete.h
 
+
+../fonction/gtk_delete.h:
+
+../fonction/gtk_search.h:
 
 ../fonction/gtk_add_ip.h:
 

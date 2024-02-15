@@ -718,4 +718,6 @@ CMakeFiles/start.dir/main.c.o: \
  /mnt/c/Users/Lucas/Desktop/CatalogueIP/Projet/fonction/gtk_add_ip.h \
  /mnt/c/Users/Lucas/Desktop/CatalogueIP/Projet/fonction/../process.h \
  /usr/include/sqlite3.h \
- /mnt/c/Users/Lucas/Desktop/CatalogueIP/Projet/fonction/gtk_search_all.h
+ /mnt/c/Users/Lucas/Desktop/CatalogueIP/Projet/fonction/gtk_search_all.h \
+ /mnt/c/Users/Lucas/Desktop/CatalogueIP/Projet/fonction/gtk_search.h \
+ /mnt/c/Users/Lucas/Desktop/CatalogueIP/Projet/fonction/gtk_delete.h

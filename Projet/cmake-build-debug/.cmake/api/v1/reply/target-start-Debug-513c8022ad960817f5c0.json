@@ -249,7 +249,9 @@
 			[
 				0,
 				2,
-				3
+				3,
+				4,
+				5
 			]
 		},
 		{
@@ -281,6 +283,16 @@
 		{
 			"backtrace" : 1,
 			"path" : "fonction/gtk_search_all.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "fonction/gtk_search.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "fonction/gtk_delete.h",
 			"sourceGroupIndex" : 0
 		}
 	],

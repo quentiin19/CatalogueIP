@@ -2,6 +2,8 @@
 
 #include "fonction/gtk_add_ip.h"
 #include "fonction/gtk_search_all.h"
+#include "fonction/gtk_search.h"
+#include "fonction/gtk_delete.h"
 
 
 static void on_activate(GtkApplication *app) {
@@ -10,7 +12,7 @@ static void on_activate(GtkApplication *app) {
     GtkWidget *window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "IP catalogue - ESGI");
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-    gtk_window_set_default_size(GTK_WINDOW(window), 800, 400);
+    gtk_window_set_default_size(GTK_WINDOW(window), 400, 400);
 
     // Create a new label with the desired text
     GtkWidget *label = gtk_label_new("IP catalogue");
@@ -33,19 +35,23 @@ static void on_activate(GtkApplication *app) {
     //choix
     GtkWidget *button_add_ip = gtk_button_new_with_label("Ajouter IP");
     g_signal_connect_swapped(button_add_ip, "clicked", G_CALLBACK(show_add_ip_dialog), window);
-    gtk_box_pack_start(GTK_BOX(main_box), button_add_ip, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(main_box), button_add_ip, FALSE, FALSE, 10);
     //choix
     GtkWidget *button_print_all = gtk_button_new_with_label("Afficher tout");
     g_signal_connect_swapped(button_print_all, "clicked", G_CALLBACK(show_all_ip), window);
-    gtk_box_pack_start(GTK_BOX(main_box), button_print_all, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(main_box), button_print_all, FALSE, FALSE, 10);
     //choix
     GtkWidget *button_search_ip = gtk_button_new_with_label("Rechercher IP");
-    g_signal_connect_swapped(button_search_ip, "clicked", G_CALLBACK(gtk_window_close), window);
-    gtk_box_pack_start(GTK_BOX(main_box), button_search_ip, FALSE, FALSE, 0);
+    g_signal_connect_swapped(button_search_ip, "clicked", G_CALLBACK(show_ip), window);
+    gtk_box_pack_start(GTK_BOX(main_box), button_search_ip, FALSE, FALSE, 10);
     //choix
     GtkWidget *button_delete_ip = gtk_button_new_with_label("Effacer IP");
-    g_signal_connect_swapped(button_delete_ip, "clicked", G_CALLBACK(gtk_window_close), window);
-    gtk_box_pack_start(GTK_BOX(main_box), button_delete_ip, FALSE, FALSE, 0);
+    g_signal_connect_swapped(button_delete_ip, "clicked", G_CALLBACK(delete_ip), window);
+    gtk_box_pack_start(GTK_BOX(main_box), button_delete_ip, FALSE, FALSE, 10);
+
+    GtkWidget *button_quit = gtk_button_new_with_label("QUITTER");
+    g_signal_connect_swapped(button_quit, "clicked", G_CALLBACK(gtk_window_close), window);
+    gtk_box_pack_start(GTK_BOX(main_box), button_quit, FALSE, FALSE, 10);
 
 
     // Ajouter les elements

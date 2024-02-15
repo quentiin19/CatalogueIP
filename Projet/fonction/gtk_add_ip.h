@@ -4,30 +4,10 @@
 
 #include <gtk/gtk.h>
 #include "../process.h"
-#include <gtk/gtk.h>
 
 
-void insert_ip_data(sqlite3 *db, const char* ipv4_address, const char* mask, const char* binary_result, const char* binary_mask, const char* hex_result, const char* network) {
 
-    char *err_msg = 0;
-    char sql[1024];
-    int rc;
 
-    size_t size = sizeof(ipv4_address);
-    printf("avant func --- %zu \n",size);
-
-    sprintf(sql, "INSERT INTO Address (IPV4, Binary_IPV4, Mask, Binary_mask, Hexadecimal, Network) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');", ipv4_address, binary_result, mask, binary_mask, hex_result, network);
-
-    printf("requete : %s", sql);
-    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
-
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", err_msg);
-        sqlite3_free(err_msg);
-    } else {
-        printf("IP address data inserted successfully\n");
-    }
-}
 
 void show_add_ip_dialog(GtkWidget *widget, gpointer user_data) {
 
