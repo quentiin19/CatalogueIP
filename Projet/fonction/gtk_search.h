@@ -5,8 +5,6 @@
 #include <gtk/gtk.h>
 
 
-
-
 int searchh(sqlite3 *db) {
     char *err_msg = 0;
     int rc;
@@ -54,6 +52,7 @@ int searchh(sqlite3 *db) {
 
 
 int show_ip(GtkWidget *widget, gpointer user_data) {
+
     sqlite3 *db;
 
     char *err_msg = 0;
@@ -103,6 +102,10 @@ int show_ip(GtkWidget *widget, gpointer user_data) {
 
         gint result = gtk_dialog_run(GTK_DIALOG(dialog));
 
+        if (sqlite3_open("../bdd.sqlite", &db) != SQLITE_OK) {
+            return 1;
+        }
+
 
         if (result == GTK_RESPONSE_OK) {
 
@@ -110,21 +113,12 @@ int show_ip(GtkWidget *widget, gpointer user_data) {
             const char *mask_text = gtk_entry_get_text(GTK_ENTRY(mask_entry));
 
 
-            if (verify_format_ipv4(ipv4_text)) {
+            if (verify_format_ipv4(ipv4_text) && verify_format_mask(mask_text)) {
 
-                gtk_widget_destroy(ipv4_entry);
-                gtk_widget_destroy(ipv4_label);
-                gtk_widget_destroy(mask_entry);
-                gtk_widget_destroy(mask_label);
-
-
-
-                //INSERT
-
-
-                if (sqlite3_open("../bdd.sqlite", &db) != SQLITE_OK) {
-                    return 1;
-                }
+                // gtk_widget_destroy(ipv4_entry);
+                // gtk_widget_destroy(ipv4_label);
+                // gtk_widget_destroy(mask_entry);
+                // gtk_widget_destroy(mask_label);
 
 
                 GtkWidget *treeview;
@@ -170,9 +164,6 @@ int show_ip(GtkWidget *widget, gpointer user_data) {
                 printf("salut 1");
 
 
-
-
-
                 convert_ipv4_to_binary(ipv4_text, binary_result);
                 convert_ipv4_to_binary(mask_text, binary_mask);
 
@@ -188,7 +179,8 @@ int show_ip(GtkWidget *widget, gpointer user_data) {
 
                 char * buffer2 = malloc(sizeof(char)*100);
 
-                sprintf(buffer2, "SELECT Id, IPV4, Binary_IPV4, Mask, Binary_mask, Hexadecimal FROM Address WHERE Network = '%s'", network);
+                // sprintf(buffer2, "SELECT Id, IPV4, Binary_IPV4, Mask, Binary_mask, Hexadecimal FROM Address WHERE Network = '%s'", network);
+                sprintf(buffer2, "SELECT Id, IPV4, Binary_IPV4, Mask, Binary_mask, Hexadecimal FROM Address;");
 
 
                 if (sqlite3_exec(db, buffer2, display, &queryData, &err_msg) != SQLITE_OK) {
@@ -198,7 +190,6 @@ int show_ip(GtkWidget *widget, gpointer user_data) {
                 }
 
 
-                //sqlite3_close(db);
 
             //INSERT
 
@@ -210,9 +201,12 @@ int show_ip(GtkWidget *widget, gpointer user_data) {
 
         } else if (result == GTK_RESPONSE_CANCEL) {
             running = 0;
+
+            sqlite3_close(db);
         }
     }
-    //gtk_widget_destroy(dialog);
+    
+    gtk_widget_destroy(dialog);
 
     return 0;
 

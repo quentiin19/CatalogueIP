@@ -1,4 +1,3 @@
-
 #ifndef GTK_TP_GTK_SEARCH_ALL_H
 #define GTK_TP_GTK_SEARCH_ALL_H
 
@@ -13,6 +12,7 @@ typedef struct {
     int num_cols;
 } QueryData;
 
+
 int display(void *data, int argc, char **argv, char **azColName) {
     QueryData *queryData = (QueryData *)data;
     GtkListStore *store = queryData->store;
@@ -24,7 +24,7 @@ int display(void *data, int argc, char **argv, char **azColName) {
 
     for (int i = 0; i < argc; i++) {
         gtk_list_store_set(store, &iter, i, argv[i] ? argv[i] : "NULL", -1);
-        //printf("%s",argv[i]);
+        printf("%s\n",argv[i]);
     }
 
     return 0;

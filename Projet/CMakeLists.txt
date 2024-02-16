@@ -29,10 +29,16 @@ endif (UNIX)
 # Ajoute un éxecutable à partir du main.c
 add_executable(start process.h
         main.c
-        fonction/gtk_add_ip.h
-        fonction/gtk_search_all.h
-        fonction/gtk_search.h
-        fonction/gtk_delete.h)  # Assurez-vous que process.c est inclus dans la liste des fichiers source
+        fonction/function.h
+        fonction/function.c
+        fonction/cli_display.h
+        fonction/cli_display.c
+        fonction/gtk_add_ip.h)  # Assurez-vous que process.c est inclus dans la liste des fichiers source
+
+
+        # fonction/gtk_search_all.h
+        # fonction/gtk_search.h
+        # fonction/gtk_delete.h)  # Assurez-vous que process.c est inclus dans la liste des fichiers source
 
 # Lie à l'éxecutable les librairies GTK+ et SQLite
 TARGET_LINK_LIBRARIES(start ${GTK3_LIBRARIES} ${SQLite3_LIBRARIES})

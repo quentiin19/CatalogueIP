@@ -33,7 +33,7 @@ void insert_ip_data(sqlite3 *db, const char* ipv4_address, const char* mask, con
 }
 
 
-void convert_IPV4(const char* ipv4_address, char* binary_result, char* mask, char* binary_mask, char* hex_result, char* network) {
+void convert_IPV4(const char* ipv4_address, char* binary_result, const char* mask, char* binary_mask, char* hex_result, char* network) {
     int a, b, c, d;
    
     // Analyser l'adresse IPv4 et extraire les octets
@@ -102,8 +102,9 @@ void create_bdd(sqlite3 *db) {
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK) {
-        // fprintf(stderr, "SQL error: %s\n", err_msg);
+        fprintf(stderr, "SQL error: %s\n", err_msg);
         sqlite3_free(err_msg);
+
     } else {
         printf("Table created successfully\n");
     }

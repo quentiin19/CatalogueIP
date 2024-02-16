@@ -95,9 +95,16 @@ void show_add_ip_dialog(GtkWidget *widget, gpointer user_data) {
                 convert_IPV4(ipv4_text, binary_result, mask_text, binary_mask, hex_result, network);
 
                 //char * ip_buff = malloc(sizeof(char)*25);
+                printf("IP : %s\n", ipv4_text);
+                printf("MASK : %s\n", mask_text);
+                printf("BINARY IP : %s\n", binary_result);
+                printf("BINARY MASK : %s\n", binary_mask);
+                printf("HEX : %s\n", hex_result);
+                printf("NETWORK : %s\n", network);
 
                 insert_ip_data(db, ipv4_text, mask_text, binary_result, binary_mask, hex_result, network);
                 sqlite3_close(db);
+
 
                 gtk_widget_destroy(ipv4_entry);
                 gtk_widget_destroy(mask_entry);
