@@ -1,4 +1,4 @@
-#include <gtk/gtk.h>
+// #include <gtk/gtk.h>
 
 // #include "fonction/gtk_add_ip.h"
 // #include "fonction/gtk_search_all.h"

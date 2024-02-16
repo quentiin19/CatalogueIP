@@ -10,7 +10,7 @@
 
 
 int create_bdd(sqlite3 *db);
-int open_bdd(sqlite3 *db);
+int open_bdd(sqlite3 **db);
 
 int verify_format_ipv4(const char* ipv4_address);
 int verify_format_mask(const char* mask);

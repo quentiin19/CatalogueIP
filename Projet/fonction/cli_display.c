@@ -45,8 +45,8 @@ int display_add_ip(sqlite3 *db){
 
     int running = 1;
 
-    char ip[16];
-    char mask[16];
+    char ip[17];
+    char mask[17];
 
     while (running){
 
@@ -243,8 +243,9 @@ int display_menu(){
     // Initialisation de la base de données
     sqlite3 *db;
 
-    if(open_bdd(db)){
+    if(open_bdd(&db)){
         fprintf(stderr, "Can't open database.\n");
+        
         if (create_bdd(db)){
             fprintf(stderr, "Error while creating database.\n");
             return 1;
@@ -323,5 +324,6 @@ int display_menu(){
         }   
     }
 
+    sqlite3_close(db);
     return 0;
 }
