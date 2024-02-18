@@ -9,12 +9,13 @@
 #include <gtk/gtk.h>
 
 
+
 // main menu
-void gtk_display_main_menu(GtkApplication *app);
+void gtk_display_menu(GtkApplication *app);
 
 
 // display all
-int display(void *data, int argc, char **argv, char **azColName);
+int display_ip_array(void *store_widget, int count, char **data, char **column_name);
 int gtk_display_all_ip();
 
 
@@ -24,10 +25,10 @@ int show_ip(GtkWidget *widget, gpointer user_data);
 
 
 // delete
-void gtk_display_delete_ip(GtkWidget *widget, gpointer user_data);
+void gtk_display_remove_ip(GtkWidget *widget, gpointer user_data);
 
 
 // add
-void gtk_display_add_ip(GtkWidget *widget, gpointer user_data);
+void gtk_display_add_ip(GtkWidget *widget, gpointer window);
 
 #endif
