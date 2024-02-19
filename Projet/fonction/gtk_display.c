@@ -46,6 +46,7 @@ void gtk_display_add_ip(GtkWidget *widget, gpointer window){
 
 
     char * result_message;
+    GtkWidget *result_message_label = NULL;
 
 
     int running = 1;
@@ -86,19 +87,22 @@ void gtk_display_add_ip(GtkWidget *widget, gpointer window){
                     }
                 }
 
-                add_ip_to_db(db, ipv4_text, mask_text);
+                // if(ip_exist(db, ipv4_text, mask_text)){
+                //     result_message = "L'ip existe déjà dans la base de données";
+
+                // }else{
+                    add_ip_to_db(db, ipv4_text, mask_text);
+                // }
 
                 sqlite3_close(db);
-
-
-                // gtk_widget_destroy(ipv4_entry);
-                // gtk_widget_destroy(mask_entry);
-                // gtk_widget_destroy(mask_label);
-                // gtk_widget_destroy(ipv4_label);
             };
 
 
-            GtkWidget *result_message_label = gtk_label_new(NULL);
+            if (result_message_label != NULL){
+                gtk_widget_destroy(result_message_label);
+            }
+
+            result_message_label = gtk_label_new(NULL);
 
             gtk_label_set_text(GTK_LABEL(result_message_label), g_strdup_printf(result_message));
             gtk_container_add(GTK_CONTAINER(content_area), result_message_label);
@@ -374,8 +378,111 @@ int gtk_display_search_ip(GtkWidget *widget, gpointer window){
 
 
 // remove
-void gtk_display_remove_ip(GtkWidget *widget, gpointer user_data){
-    int a;
+void gtk_display_remove_ip(GtkWidget *widget, gpointer window){
+
+    // Create a dialog window
+    GtkWidget *dialog = gtk_dialog_new_with_buttons("Supprimer une IP",
+                                                    GTK_WINDOW(window),
+                                                    GTK_DIALOG_MODAL,
+                                                    "Fermer",
+                                                    GTK_RESPONSE_CANCEL,
+                                                    "Supprimer",
+                                                    GTK_RESPONSE_OK,
+                                                    NULL);
+
+    gtk_window_set_default_size(GTK_WINDOW(dialog), 400, 300);
+
+    g_signal_connect(dialog, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+
+    GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
+    GtkWidget *ipv4_label = gtk_label_new("Adresse IPv4:");
+    GtkWidget *ipv4_entry = gtk_entry_new();
+    GtkWidget *mask_label = gtk_label_new("Masque:");
+    GtkWidget *mask_entry = gtk_entry_new();
+
+
+    gtk_container_add(GTK_CONTAINER(content_area), ipv4_label);
+    gtk_container_add(GTK_CONTAINER(content_area), ipv4_entry);
+    gtk_container_add(GTK_CONTAINER(content_area), mask_label);
+    gtk_container_add(GTK_CONTAINER(content_area), mask_entry);
+
+
+    gtk_widget_show_all(dialog);
+
+
+    char * result_message = NULL;
+    GtkWidget *result_message_label = NULL;
+
+
+    int running = 1;
+
+    while(running) {
+
+
+        gint result = gtk_dialog_run(GTK_DIALOG(dialog));
+
+
+        if (result == GTK_RESPONSE_OK) {
+
+            const char *ipv4_text = gtk_entry_get_text(GTK_ENTRY(ipv4_entry));
+            const char *mask_text = gtk_entry_get_text(GTK_ENTRY(mask_entry));
+
+
+            if (verify_format_ipv4(ipv4_text) && (verify_format_mask(mask_text))) {
+                result_message = "IP et MASK incorrect \n";
+
+            }else if (verify_format_ipv4(ipv4_text)) {
+                result_message = "Format de l'ip INCORRECT \n";
+
+            }else if (verify_format_mask(mask_text)) {
+                result_message = "Format du MASK INCORRECT \n";
+
+            }else{
+                // result_message = "IP dans la database \n";
+
+
+                sqlite3 * db;
+
+                if(open_bdd(&db)){
+                    fprintf(stderr, "Can't open database.\n");
+                    
+                    if (create_bdd(db)){
+                        fprintf(stderr, "Error while creating database.\n");
+                        return;
+                    }
+                }
+
+                if(delete_ip_from_db(db, ipv4_text, mask_text)){
+                    fprintf(stderr, "Error while deleting IP from database.\n");
+                }
+
+                result_message = "l'IP a bien été supprimé de la base de données";
+
+                sqlite3_close(db);
+            };
+
+            if (result_message_label != NULL){
+                gtk_widget_destroy(result_message_label);
+            }
+
+            result_message_label = gtk_label_new(NULL);
+            
+            gtk_label_set_text(GTK_LABEL(result_message_label), g_strdup_printf(result_message));
+            gtk_container_add(GTK_CONTAINER(content_area), result_message_label);
+
+            gtk_widget_show_all(dialog);
+
+            // gtk_container_remove(GTK_CONTAINER(content_area), result_message_label);
+
+
+        } else if (result == GTK_RESPONSE_CANCEL) {
+            running = 0;
+            
+        }
+    }
+    gtk_widget_destroy(dialog);
 }
 
 

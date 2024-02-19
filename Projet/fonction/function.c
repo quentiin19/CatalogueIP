@@ -167,6 +167,40 @@ int open_bdd(sqlite3 **db){
 }
 
 
+int callback_ip_exist(void * ip_exist, int count, char **data, char **column_name){
+
+    printf("test");
+
+    *((int *)ip_exist) = atoi(data[0]);
+
+    return 0;
+}
+
+
+int ip_exist(sqlite3 *db, const char* ipv4_address, const char* mask){
+    char query[1024];
+
+    sprintf(query, "SELECT COUNT(*) FROM Address WHERE IPV4 = '%s' AND Mask = '%s';", ipv4_address, mask);
+
+    int * ip_exist;
+
+    if (sqlite3_exec(db, query, callback_ip_exist, ip_exist, NULL) != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+        return 0;
+    }
+
+    printf("aaaaa");
+    printf("ip_exist : %d\n", ip_exist);
+
+    // if(ip_exist){
+    //     return 1;
+    // }else{
+    //     return 0;
+    // }
+    return 0;
+}
+
+
 int add_ip_to_db(sqlite3 *db, const char* ipv4_address, const char* mask){
     char query[1024];
 

@@ -12,7 +12,7 @@
 
 int main(int argc, char *argv[]) {
     
-    int mode = 1;
+    int mode = 3;
 
     if (mode == 0){
         display_menu();
@@ -29,6 +29,18 @@ int main(int argc, char *argv[]) {
 
 
         return g_application_run(G_APPLICATION(app), argc, argv);
+    }
+
+    else if (mode == 2){
+        
+        sqlite3 *db;
+        open_bdd(&db);
+
+        char ip[] = "10.0.0.1";
+        char mask[] = "255.0.0.0";
+
+
+        printf("%d\n", ip_exist(db, ip, mask));
     }
 
 

@@ -74,12 +74,14 @@ int display_add_ip(sqlite3 *db){
         }else if (verify_format_mask(mask)){
             printf("Format du masque incorrect.\n");
 
+        }else if(ip_exist(db, ip, mask)){
+            printf("L'adresse IP existe déjà en base de données.\n");
+        
         }else{
             if (add_ip_to_db(db, ip, mask)){
                 printf("Erreur lors de l'ajout de l'adresse IP en base de données.\n");
                 return 1;
-            }else
-            {
+            }else{
                 printf("Adresse IP ajoutée avec succès.\n");
             }
         }
@@ -217,6 +219,9 @@ int display_remove_ip(sqlite3 *db){
         }else if (verify_format_mask(mask)){
             printf("Format du masque incorrect.\n");
 
+        }else if(!ip_exist(db, ip, mask)){
+            printf("L'adresse IP n'existe pas en base de données.\n");
+        
         }else{
             // Création de la requete SQL
             char query[1024];
