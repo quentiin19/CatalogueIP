@@ -11,37 +11,58 @@
 
 
 int main(int argc, char *argv[]) {
-    
-    int mode = 3;
 
-    if (mode == 0){
+    if (argc != 2 || (strcmp(argv[1], "-c") != 0 && strcmp(argv[1], "-g") != 0)){
+        printf("Mauvaise utilisation du programme. Usage : ./prog [--cli | --gui]\n");
+        return 1;
+        
+    }else if (strcmp(argv[1], "-c") == 0){
         display_menu();
-    }
+        return 0;
 
-    else if (mode == 1){
-
-
+    }else if (strcmp(argv[1], "-g") == 0){
         // Création de l'app GTK
         GtkApplication *app = gtk_application_new("ESGI.app.exam.langagec", G_APPLICATION_DEFAULT_FLAGS);
 
         // Lancement de la fonction principale
         g_signal_connect(app, "activate", G_CALLBACK(gtk_display_menu), NULL);
 
-
-        return g_application_run(G_APPLICATION(app), argc, argv);
+        return g_application_run(G_APPLICATION(app), (argc - 1), argv);
     }
-
-    else if (mode == 2){
         
-        sqlite3 *db;
-        open_bdd(&db);
+    
+    
+    
+    // int mode = 1;
 
-        char ip[] = "10.0.0.1";
-        char mask[] = "255.0.0.0";
+    // if (mode == 0){
+    //     display_menu();
+    // }
+
+    // else if (mode == 1){
 
 
-        printf("%d\n", ip_exist(db, ip, mask));
-    }
+    //     // Création de l'app GTK
+    //     GtkApplication *app = gtk_application_new("ESGI.app.exam.langagec", G_APPLICATION_DEFAULT_FLAGS);
+
+    //     // Lancement de la fonction principale
+    //     g_signal_connect(app, "activate", G_CALLBACK(gtk_display_menu), NULL);
+
+
+    //     return g_application_run(G_APPLICATION(app), argc, argv);
+    // }
+
+    // else if (mode == 2){
+        
+    //     sqlite3 *db;
+    //     open_bdd(&db);
+
+    //     char ip[] = "10.0.0.1";
+    //     char mask[] = "255.0.0.0";
+
+    
+    //     printf("%d\n", ip_exist(db, ip, mask));
+    // }
 
 
 

@@ -166,6 +166,8 @@ int display_search_ip(sqlite3 *db){
                 return 1;
             }
 
+            printf("Réseau : %s\n", network);
+
             // Création de la requete SQL
             char query[1024];
             sprintf(query, "SELECT Id, IPV4, Mask FROM Address WHERE Network = '%s';", network);

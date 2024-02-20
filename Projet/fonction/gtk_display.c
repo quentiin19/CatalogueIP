@@ -87,12 +87,15 @@ void gtk_display_add_ip(GtkWidget *widget, gpointer window){
                     }
                 }
 
-                // if(ip_exist(db, ipv4_text, mask_text)){
-                //     result_message = "L'ip existe déjà dans la base de données";
-
-                // }else{
-                    add_ip_to_db(db, ipv4_text, mask_text);
-                // }
+                if(!ip_exist(db, ipv4_text, mask_text)){
+                    if(add_ip_to_db(db, ipv4_text, mask_text)){
+                        fprintf(stderr, "Error while adding IP to database.\n");
+                    }
+                    result_message = "l'IP a bien été ajoutée à la base de données";
+                    
+                }else{
+                    result_message = "L'IP existe déjà dans la base de données";
+                }
 
                 sqlite3_close(db);
             };
@@ -454,11 +457,15 @@ void gtk_display_remove_ip(GtkWidget *widget, gpointer window){
                     }
                 }
 
-                if(delete_ip_from_db(db, ipv4_text, mask_text)){
-                    fprintf(stderr, "Error while deleting IP from database.\n");
-                }
+                if(ip_exist(db, ipv4_text, mask_text)){
+                    if(delete_ip_from_db(db, ipv4_text, mask_text)){
+                        fprintf(stderr, "Error while deleting IP from database.\n");
+                    }
+                    result_message = "l'IP a bien été supprimé de la base de données";
 
-                result_message = "l'IP a bien été supprimé de la base de données";
+                }else{
+                    result_message = "L'ip n'existe pas dans la base de données";
+                }
 
                 sqlite3_close(db);
             };
