@@ -142,10 +142,10 @@ int get_network(const char* ip_address, const char* mask, char* network){
 
 int create_bdd(sqlite3 *db) {
 
-    char *sql = "CREATE TABLE Address(Id INTEGER PRIMARY KEY AUTOINCREMENT, IPV4 TEXT, Binary_IPV4 TEXT, Mask TEXT, Binary_mask TEXT, Hexadecimal TEXT, Network TEXT);";
+    char * query = "CREATE TABLE Address(Id INTEGER PRIMARY KEY AUTOINCREMENT, IPV4 TEXT, Binary_IPV4 TEXT, Mask TEXT, Binary_mask TEXT, Hexadecimal TEXT, Network TEXT);";
 
-    if (sqlite3_exec(db, sql, 0, 0, NULL) != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+    if (sqlite3_exec(db, query, 0, 0, NULL) != SQLITE_OK) {
+        fprintf(stderr, "SQL error create: %s\n", sqlite3_errmsg(db));
 
         return 1;
         
@@ -157,33 +157,34 @@ int create_bdd(sqlite3 *db) {
 
 
 int open_bdd(sqlite3 **db){
+    char * query = "SELECT * from Address;";
+
     if (sqlite3_open("bdd.sqlite", db) != SQLITE_OK) {
         fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(*db));
         sqlite3_close(*db);
         return 1;
     }
 
+    if (sqlite3_exec(*db, query, 0, 0, NULL) != SQLITE_OK) {
+        if (create_bdd(*db)){
+            fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(*db));
+            sqlite3_close(*db);
+            return 1;
+        }
+    }
     return 0;
 }
 
 
+
 int callback_ip_exist(void * ip_exist, int count, char **data, char **column_name){
-
-    printf("aaaa : %c\n", *data[0]);
-
-    printf("aaaa* : %s\n", *data);
 
     if (strcmp(data[0], "0") == 0)
     {
-        printf("data est = a 0\n");
         *((int *)ip_exist) = 0;
     }else{
-        printf("data est = a 1\n");
         *((int *)ip_exist) = 1;
     }
-    
-
-    //*((int *)ip_exist) = atoi(data[0]);
 
     return 0;
 }
@@ -245,7 +246,7 @@ int add_ip_to_db(sqlite3 *db, const char* ipv4_address, const char* mask){
         return 1;
 
     } else {
-        printf("IP address data inserted successfully\n");
+        printf("IP address inserted successfully\n");
         return 0;
     }
 }
@@ -263,7 +264,7 @@ int delete_ip_from_db(sqlite3 *db, const char* ipv4_address, const char* mask){
         return 1;
 
     } else {
-        printf("IP address data inserted successfully\n");
+        printf("IP address removed successfully\n");
         return 0;
     }
 }
